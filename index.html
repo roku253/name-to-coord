@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>氏名 → 座標（検証ツール）</title>
+  <style>
+    body { margin: 0; font-family: "Segoe UI", Meiryo, sans-serif; background: #0c1220; color: #e4e8f0; min-height: 100vh; }
+    #site-root { visibility: hidden; }
+    html.token-gate-ok #site-root { visibility: visible; }
+    .box { max-width: 520px; margin: 0 auto; padding: 32px 20px; }
+    h1 { font-size: 1.1rem; font-weight: 600; letter-spacing: 0.05em; }
+    p { font-size: 0.85rem; color: #9aa8c4; line-height: 1.7; }
+    label { display: block; margin-top: 20px; font-size: 0.8rem; color: #7d8fb3; }
+    input {
+      width: 100%; margin-top: 6px; padding: 10px 12px; border-radius: 8px;
+      border: 1px solid #2a3a5c; background: #111a2e; color: #fff; font-size: 1rem;
+    }
+    button {
+      margin-top: 16px; padding: 10px 20px; border-radius: 8px; border: none;
+      background: #3b82f6; color: #fff; font-weight: 600; cursor: pointer;
+    }
+    button:hover { opacity: 0.92; }
+    #out {
+      margin-top: 24px; padding: 16px; border-radius: 10px; background: #111a2e;
+      border: 1px solid #2a3a5c; font-family: ui-monospace, monospace; font-size: 0.95rem; min-height: 3em;
+    }
+  </style>
+  <style>
+    .ns-denied-overlay {
+      position: fixed; inset: 0; z-index: 999999;
+      background: #0c1220;
+      color: #e4e8f0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: "Segoe UI", Meiryo, sans-serif;
+      padding: 24px;
+    }
+    .ns-denied-card {
+      max-width: 520px; width: 100%;
+      background: #111a2e;
+      border: 1px solid #2a3a5c;
+      border-radius: 10px;
+      padding: 28px 26px;
+    }
+    .ns-denied-card h1 { margin: 0 0 12px; font-size: 17px; letter-spacing: 0.05em; }
+    .ns-denied-card .code {
+      font-family: ui-monospace, monospace; font-size: 13px;
+      background: #0c1220; border: 1px solid #2a3a5c; padding: 10px 12px;
+      color: #7eb1ff; margin: 12px 0;
+    }
+    .ns-denied-card p { margin: 6px 0; font-size: 13px; color: #9aa8c4; line-height: 1.7; }
+    .ns-denied-card .small { font-size: 11px; color: #6f7d9b; margin-top: 14px; }
+  </style>
+  <script>window.__TOKEN_RESOURCE_KEY__ = "ext:name-to-coord"</script>
+  <script>
+    window.__TOKEN_DENIED__ = function (msg) {
+      var el = document.createElement("div");
+      el.className = "ns-denied-overlay";
+      el.innerHTML =
+        '<div class="ns-denied-card">' +
+        '<h1>name-to-coord ｜ 認証エラー</h1>' +
+        '<div class="code">> auth: failed&#10;> reason: account_not_entitled</div>' +
+        '<p>このツールは内部検証用です。発行元の調査ポータルから起動してください。</p>' +
+        '<p class="small">' + String(msg || "").replace(/[<>]/g, "") + '</p>' +
+        '</div>';
+      document.documentElement.appendChild(el);
+    };
+  </script>
+  <script src="./token-gate.js" defer></script>
+</head>
+<body>
+  <div id="site-root">
+    <div class="box">
+      <h1>氏名 → 座標（内部検証用）</h1>
+      <p>調査対象者のフルネームを入力し、「算出」で緯度経度を取得します。表記ゆれ（漢字・かな・ローマ字）は正規化して照合します。</p>
+      <label for="name">フルネーム</label>
+      <input id="name" type="text" autocomplete="off" placeholder="例: 水瀬ハルト" />
+      <button type="button" id="go">算出</button>
+      <div id="out" aria-live="polite"></div>
+    </div>
+  </div>
+  <script>
+    document.getElementById("go").addEventListener("click", function () {
+      var raw = (document.getElementById("name").value || "").trim()
+      var n = raw.normalize("NFKC").toLowerCase().replace(/\s+/g, "")
+      var hit =
+        n.indexOf("水瀬ハルト") !== -1 ||
+        n.indexOf("みずせはると") !== -1 ||
+        n.indexOf("ミズセハルト") !== -1 ||
+        n === "mizuseharuto" ||
+        n.indexOf("mizuse") !== -1 && n.indexOf("haruto") !== -1
+      var el = document.getElementById("out")
+      if (hit) {
+        el.textContent = "35.42, 138.91"
+      } else if (!raw) {
+        el.textContent = "名前を入力してください。"
+      } else {
+        el.textContent = "一致する記録がありません。（表記を確認してください）"
+      }
+    })
+  </script>
+</body>
+</html>
