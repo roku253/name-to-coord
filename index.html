@@ -92,6 +92,18 @@
       return h >>> 0
     }
 
+    /** 表示・丸め: 小数点以下は 5 桁にそろえる（4〜5 桁相当で読みやすく） */
+    var COORD_DECIMALS = 5
+
+    function roundCoord(x) {
+      var m = Math.pow(10, COORD_DECIMALS)
+      return Math.round(x * m) / m
+    }
+
+    function formatCoordPair(lat, lng) {
+      return roundCoord(lat).toFixed(COORD_DECIMALS) + ", " + roundCoord(lng).toFixed(COORD_DECIMALS)
+    }
+
     function deterministicJapanCoord(key) {
       var h1 = hashString(key)
       var h2 = hashString(key + ":lng")
@@ -102,8 +114,8 @@
       var lat = latMin + ((h1 % 1000000) / 1000000) * (latMax - latMin)
       var lng = lngMin + ((h2 % 1000000) / 1000000) * (lngMax - lngMin)
       return {
-        lat: Math.round(lat * 1e6) / 1e6,
-        lng: Math.round(lng * 1e6) / 1e6,
+        lat: roundCoord(lat),
+        lng: roundCoord(lng),
       }
     }
 
@@ -116,13 +128,13 @@
         n === "mizuseharuto" ||
         (n.indexOf("mizuse") !== -1 && n.indexOf("haruto") !== -1)
       if (hit) {
-        return "36.052096704400995, 138.11843672052697"
+        return formatCoordPair(36.052096704400995, 138.11843672052697)
       }
       if (!raw) {
         return "名前を入力してください。"
       }
       var c = deterministicJapanCoord(n)
-      return c.lat + ", " + c.lng
+      return formatCoordPair(c.lat, c.lng)
     }
 
     function runCalc() {
