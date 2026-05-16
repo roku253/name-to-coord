@@ -158,6 +158,17 @@
     })
 
     ;(function () {
+      var KN_FP_KEY = "signal_trace_kn_footprint_v2"
+      window.addEventListener("storage", function (e) {
+        if (e.key !== KN_FP_KEY) return
+        var v = e.newValue
+        if (v !== "purged_delete" && v !== "purged_keep") return
+        var raw = (document.getElementById("name").value || "").trim()
+        if (raw) runCalc()
+      })
+    })()
+
+    ;(function () {
       var KN_PURGE_CHAIN = [
         "https://roku253.github.io/urban-legend-board/?kn_purge=1&kn_step=0",
         "https://roku253.github.io/kasuminomori/?kn_purge=1&kn_step=1",
