@@ -24,6 +24,15 @@
       margin-top: 24px; padding: 16px; border-radius: 10px; background: #111a2e;
       border: 1px solid #2a3a5c; font-family: ui-monospace, monospace; font-size: 0.95rem; min-height: 3em;
     }
+    .fiction-disclaimer {
+      margin-top: 28px;
+      padding-top: 16px;
+      border-top: 1px solid #2a3a5c;
+      font-size: 11px;
+      line-height: 1.7;
+      color: #7d8fb3;
+    }
+    .fiction-disclaimer strong { color: #c5d4eb; font-weight: 600; }
   </style>
   <style>
     .ns-denied-overlay {
@@ -42,13 +51,7 @@
       padding: 28px 26px;
     }
     .ns-denied-card h1 { margin: 0 0 12px; font-size: 17px; letter-spacing: 0.05em; }
-    .ns-denied-card .code {
-      font-family: ui-monospace, monospace; font-size: 13px;
-      background: #0c1220; border: 1px solid #2a3a5c; padding: 10px 12px;
-      color: #7eb1ff; margin: 12px 0;
-    }
     .ns-denied-card p { margin: 6px 0; font-size: 13px; color: #9aa8c4; line-height: 1.7; }
-    .ns-denied-card .small { font-size: 11px; color: #6f7d9b; margin-top: 14px; }
   </style>
   <script>window.__TOKEN_RESOURCE_KEY__ = "ext:name-to-coord"</script>
   <script>
@@ -57,10 +60,8 @@
       el.className = "ns-denied-overlay";
       el.innerHTML =
         '<div class="ns-denied-card">' +
-        '<h1>認証エラー</h1>' +
-        '<div class="code">> auth: failed&#10;> reason: account_not_entitled</div>' +
+        '<h1>表示できませんでした</h1>' +
         '<p>このページを表示する権限がありません。</p>' +
-        '<p class="small">' + String(msg || "").replace(/[<>]/g, "") + '</p>' +
         '</div>';
       document.documentElement.appendChild(el);
     };
@@ -72,9 +73,10 @@
     <div class="box">
       <h1>氏名 → 座標</h1>
       <label for="name">フルネーム</label>
-      <input id="name" type="text" autocomplete="off" placeholder="例: 水瀬ハルト" />
+      <input id="name" type="text" autocomplete="off" placeholder="フルネーム" />
       <button type="button" id="go">算出</button>
       <div id="out" aria-live="polite"></div>
+      <p class="fiction-disclaimer" role="note">※本サイトは謎解き作品のための<strong>架空サイト</strong>です。記載・表示されるサービス名・地名・人物名・団体名などはフィクションであり、<strong>実在のものとは一切関係ありません</strong>。</p>
     </div>
   </div>
   <script>
