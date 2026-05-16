@@ -52,6 +52,8 @@
     }
     .ns-denied-card h1 { margin: 0 0 12px; font-size: 17px; letter-spacing: 0.05em; }
     .ns-denied-card p { margin: 6px 0; font-size: 13px; color: #9aa8c4; line-height: 1.7; }
+    .ns-denied-card .ns-portal { margin-top: 16px; font-size: 12px; line-height: 1.5; word-break: break-all; }
+    .ns-denied-card .ns-portal a { color: #7eb1ff; }
   </style>
   <script>window.__TOKEN_RESOURCE_KEY__ = "ext:name-to-coord"</script>
   <script>
@@ -62,6 +64,7 @@
         '<div class="ns-denied-card">' +
         '<h1>表示できませんでした</h1>' +
         '<p>このページを表示する権限がありません。</p>' +
+        '<p class="ns-portal"><a href="https://nazo-portal.vercel.app/portal" target="_blank" rel="noopener noreferrer">https://nazo-portal.vercel.app/portal</a></p>' +
         '</div>';
       document.documentElement.appendChild(el);
     };
