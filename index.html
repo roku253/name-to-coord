@@ -92,8 +92,8 @@
       return h >>> 0
     }
 
-    /** 表示・丸め: 小数点以下は 4 桁にそろえる（4〜5 桁相当で読みやすく） */
-    var COORD_DECIMALS = 4
+    /** 表示・丸め: 小数点以下は 5 桁にそろえる（4〜5 桁相当で読みやすく） */
+    var COORD_DECIMALS = 5
 
     function roundCoord(x) {
       var m = Math.pow(10, COORD_DECIMALS)
@@ -119,14 +119,24 @@
       }
     }
 
+    function knFootprintPurged() {
+      try {
+        var f = localStorage.getItem("signal_trace_kn_footprint_v2") || ""
+        return f === "purged_delete" || f === "purged_keep"
+      } catch (e) {
+        return false
+      }
+    }
+
     function computeCoordOutput(raw) {
       var n = raw.normalize("NFKC").toLowerCase().replace(/\s+/g, "")
       var hit =
-        n.indexOf("水瀬ハルト") !== -1 ||
-        n.indexOf("みずせはると") !== -1 ||
-        n.indexOf("ミズセハルト") !== -1 ||
-        n === "mizuseharuto" ||
-        (n.indexOf("mizuse") !== -1 && n.indexOf("haruto") !== -1)
+        !knFootprintPurged() &&
+        (n.indexOf("水瀬ハルト") !== -1 ||
+          n.indexOf("みずせはると") !== -1 ||
+          n.indexOf("ミズセハルト") !== -1 ||
+          n === "mizuseharuto" ||
+          (n.indexOf("mizuse") !== -1 && n.indexOf("haruto") !== -1))
       if (hit) {
         return formatCoordPair(36.052096704400995, 138.11843672052697)
       }
@@ -146,6 +156,49 @@
     document.getElementById("name").addEventListener("keydown", function (e) {
       if (e.key === "Enter") runCalc()
     })
+
+    ;(function () {
+      var q = new URLSearchParams(location.search)
+      if (q.get("kn_purge") !== "1") return
+      var step = parseInt(q.get("kn_step") || "0", 10)
+      var ov = document.createElement("div")
+      ov.style.cssText =
+        "position:fixed;inset:0;z-index:999998;background:rgba(12,18,32,.88);display:flex;align-items:center;justify-content:center;padding:16px;"
+      var card = document.createElement("div")
+      card.style.cssText =
+        "max-width:420px;width:100%;background:#111a2e;border:1px solid #2a3a5c;padding:22px;border-radius:10px;color:#e4e8f0;font-family:inherit;"
+      card.innerHTML =
+        '<p style="margin:0 0 10px;font-weight:600;">座標変換テーブルの条項削除</p><p style="margin:0 0 14px;font-size:13px;line-height:1.65;color:#9aa8c4;">特定ハッシュによる特例エントリを削除キューに載せますか？</p>'
+      var row = document.createElement("div")
+      row.style.cssText = "display:flex;gap:10px;justify-content:flex-end;"
+      function reply(c) {
+        try {
+          if (window.opener && !window.opener.closed) {
+            window.opener.postMessage({ type: "KN_PURGE_SITE_RESPONSE", step: step, choice: c }, "*")
+          }
+        } catch (e) {}
+        window.close()
+      }
+      var n = document.createElement("button")
+      n.textContent = "いいえ"
+      n.type = "button"
+      n.style.cssText = "padding:8px 14px;cursor:pointer;"
+      var y = document.createElement("button")
+      y.textContent = "はい"
+      y.type = "button"
+      y.style.cssText = "padding:8px 14px;cursor:pointer;background:#3b82f6;color:#fff;border:none;border-radius:6px;"
+      n.onclick = function () {
+        reply(false)
+      }
+      y.onclick = function () {
+        reply(true)
+      }
+      row.appendChild(n)
+      row.appendChild(y)
+      card.appendChild(row)
+      ov.appendChild(card)
+      document.body.appendChild(ov)
+    })()
   </script>
 </body>
 </html>
