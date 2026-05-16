@@ -81,7 +81,7 @@
   <div id="site-root">
     <div class="box">
       <h1>氏名 → 座標（内部検証用）</h1>
-      <p>調査対象者のフルネームを入力し、「算出」で緯度経度を取得します。表記ゆれ（漢字・かな・ローマ字）は正規化して照合します。</p>
+      <p>調査対象者のフルネームを入力し、「算出」で緯度経度を取得します。特定人物は固定座標、それ以外は同一入力なら常に同じ値になる疑似座標（日本国内の範囲）を返します。表記ゆれ（漢字・かな・ローマ字）は正規化して照合します。</p>
       <label for="name">フルネーム</label>
       <input id="name" type="text" autocomplete="off" placeholder="例: 水瀬ハルト" />
       <button type="button" id="go">算出</button>
@@ -90,23 +90,57 @@
     </div>
   </div>
   <script>
-    document.getElementById("go").addEventListener("click", function () {
-      var raw = (document.getElementById("name").value || "").trim()
+    function hashString(s) {
+      var h = 2166136261 >>> 0
+      for (var i = 0; i < s.length; i++) {
+        h ^= s.charCodeAt(i)
+        h = Math.imul(h, 16777619)
+      }
+      return h >>> 0
+    }
+
+    /** 同一キーなら常に同じ座標（日本の本州〜九州〜北海道にまたがる矩形・粗い海岸除外なし） */
+    function deterministicJapanCoord(key) {
+      var h1 = hashString(key)
+      var h2 = hashString(key + ":lng")
+      var latMin = 31.0
+      var latMax = 45.55
+      var lngMin = 129.0
+      var lngMax = 145.78
+      var lat = latMin + ((h1 % 1000000) / 1000000) * (latMax - latMin)
+      var lng = lngMin + ((h2 % 1000000) / 1000000) * (lngMax - lngMin)
+      return {
+        lat: Math.round(lat * 1e6) / 1e6,
+        lng: Math.round(lng * 1e6) / 1e6,
+      }
+    }
+
+    function computeCoordOutput(raw) {
       var n = raw.normalize("NFKC").toLowerCase().replace(/\s+/g, "")
       var hit =
         n.indexOf("水瀬ハルト") !== -1 ||
         n.indexOf("みずせはると") !== -1 ||
         n.indexOf("ミズセハルト") !== -1 ||
         n === "mizuseharuto" ||
-        n.indexOf("mizuse") !== -1 && n.indexOf("haruto") !== -1
-      var el = document.getElementById("out")
+        (n.indexOf("mizuse") !== -1 && n.indexOf("haruto") !== -1)
       if (hit) {
-        el.textContent = "35.42, 138.91"
-      } else if (!raw) {
-        el.textContent = "名前を入力してください。"
-      } else {
-        el.textContent = "一致する記録がありません。（表記を確認してください）"
+        return "35.420000, 138.910000"
       }
+      if (!raw) {
+        return "名前を入力してください。"
+      }
+      var c = deterministicJapanCoord(n)
+      return c.lat + ", " + c.lng
+    }
+
+    function runCalc() {
+      var raw = (document.getElementById("name").value || "").trim()
+      document.getElementById("out").textContent = computeCoordOutput(raw)
+    }
+
+    document.getElementById("go").addEventListener("click", runCalc)
+    document.getElementById("name").addEventListener("keydown", function (e) {
+      if (e.key === "Enter") runCalc()
     })
   </script>
 </body>
