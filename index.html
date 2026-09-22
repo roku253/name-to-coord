@@ -3,26 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>氏名 → 座標</title>
+  <meta name="robots" content="noindex" />
+  <title>氏名 → 座標｜サービス終了のお知らせ</title>
   <style>
     body { margin: 0; font-family: "Segoe UI", Meiryo, sans-serif; background: #0c1220; color: #e4e8f0; min-height: 100vh; }
-    #site-root { visibility: hidden; }
-    html.token-gate-ok #site-root { visibility: visible; }
-    .box { max-width: 520px; margin: 0 auto; padding: 32px 20px; }
+    .box { max-width: 520px; margin: 0 auto; padding: 48px 20px; }
     h1 { font-size: 1.1rem; font-weight: 600; letter-spacing: 0.05em; }
-    label { display: block; margin-top: 20px; font-size: 0.8rem; color: #7d8fb3; }
-    input {
-      width: 100%; margin-top: 6px; padding: 10px 12px; border-radius: 8px;
-      border: 1px solid #2a3a5c; background: #111a2e; color: #fff; font-size: 1rem;
-    }
-    button {
-      margin-top: 16px; padding: 10px 20px; border-radius: 8px; border: none;
-      background: #3b82f6; color: #fff; font-weight: 600; cursor: pointer;
-    }
-    button:hover { opacity: 0.92; }
-    #out {
-      margin-top: 24px; padding: 16px; border-radius: 10px; background: #111a2e;
-      border: 1px solid #2a3a5c; font-family: ui-monospace, monospace; font-size: 0.95rem; min-height: 3em;
+    p { font-size: 0.85rem; line-height: 1.9; color: #9aa8c4; }
+    .card {
+      margin-top: 24px; padding: 20px; border-radius: 10px; background: #111a2e;
+      border: 1px solid #2a3a5c;
     }
     .fiction-disclaimer {
       margin-top: 28px;
@@ -32,143 +22,18 @@
       line-height: 1.7;
       color: #7d8fb3;
     }
-    .fiction-disclaimer strong { color: #c5d4eb; font-weight: 600; }
   </style>
-  <style>
-    .ns-denied-overlay {
-      position: fixed; inset: 0; z-index: 999999;
-      background: #0c1220;
-      color: #e4e8f0;
-      display: flex; align-items: center; justify-content: center;
-      font-family: "Segoe UI", Meiryo, sans-serif;
-      padding: 24px;
-    }
-    .ns-denied-card {
-      max-width: 520px; width: 100%;
-      background: #111a2e;
-      border: 1px solid #2a3a5c;
-      border-radius: 10px;
-      padding: 28px 26px;
-    }
-    .ns-denied-card h1 { margin: 0 0 12px; font-size: 17px; letter-spacing: 0.05em; }
-    .ns-denied-card p { margin: 6px 0; font-size: 13px; color: #9aa8c4; line-height: 1.7; }
-    .ns-denied-card .ns-portal { margin-top: 16px; font-size: 12px; line-height: 1.5; word-break: break-all; }
-    .ns-denied-card .ns-portal a { color: #7eb1ff; }
-  </style>
-  <script>window.__TOKEN_RESOURCE_KEY__ = "ext:name-to-coord"</script>
-  <script>
-    window.__TOKEN_DENIED__ = function (msg) {
-      var el = document.createElement("div");
-      el.className = "ns-denied-overlay";
-      el.innerHTML =
-        '<div class="ns-denied-card">' +
-        '<h1>表示できませんでした</h1>' +
-        '<p>このページを表示する権限がありません。</p>' +
-        '<p class="ns-portal"><a href="https://nazo-portal.vercel.app/portal" target="_blank" rel="noopener noreferrer">https://nazo-portal.vercel.app/portal</a></p>' +
-        '</div>';
-      document.documentElement.appendChild(el);
-    };
-  </script>
-  <script src="./token-gate.js" defer></script>
 </head>
 <body>
-  <div id="site-root">
-    <div class="box">
-      <h1>氏名 → 座標</h1>
-      <label for="name">フルネーム</label>
-      <input id="name" type="text" autocomplete="off" placeholder="フルネーム" />
-      <button type="button" id="go">算出</button>
-      <div id="out" aria-live="polite"></div>
-      <p class="fiction-disclaimer" role="note">※本サイトは謎解き作品のための<strong>架空サイト</strong>です。記載・表示されるサービス名・地名・人物名・団体名などはフィクションであり、<strong>実在のものとは一切関係ありません</strong>。</p>
+  <div class="box">
+    <h1>氏名 → 座標 変換ツール</h1>
+    <div class="card">
+      <p>本ツールは提供を終了しました。長らくのご利用ありがとうございました。</p>
+      <p>過去の変換結果・ログはすべて削除済みです。</p>
+    </div>
+    <div class="fiction-disclaimer">
+      本ページはフィクション（謎解きゲーム）の一部として制作された架空のサービスです。実在の人物・団体・地名とは関係ありません。
     </div>
   </div>
-  <script>
-    function hashString(s) {
-      var h = 2166136261 >>> 0
-      for (var i = 0; i < s.length; i++) {
-        h ^= s.charCodeAt(i)
-        h = Math.imul(h, 16777619)
-      }
-      return h >>> 0
-    }
-
-    /** 表示・丸め: 小数点以下は 5 桁にそろえる（4〜5 桁相当で読みやすく） */
-    var COORD_DECIMALS = 5
-
-    function roundCoord(x) {
-      var m = Math.pow(10, COORD_DECIMALS)
-      return Math.round(x * m) / m
-    }
-
-    function formatCoordPair(lat, lng) {
-      return roundCoord(lat).toFixed(COORD_DECIMALS) + ", " + roundCoord(lng).toFixed(COORD_DECIMALS)
-    }
-
-    function deterministicJapanCoord(key) {
-      var h1 = hashString(key)
-      var h2 = hashString(key + ":lng")
-      var latMin = 31.0
-      var latMax = 45.55
-      var lngMin = 129.0
-      var lngMax = 145.78
-      var lat = latMin + ((h1 % 1000000) / 1000000) * (latMax - latMin)
-      var lng = lngMin + ((h2 % 1000000) / 1000000) * (lngMax - lngMin)
-      return {
-        lat: roundCoord(lat),
-        lng: roundCoord(lng),
-      }
-    }
-
-    function knFootprintPurged() {
-      try {
-        var f = localStorage.getItem("signal_trace_kn_footprint_v2") || ""
-        return f === "purged_delete" || f === "purged_keep"
-      } catch (e) {
-        return false
-      }
-    }
-
-    function computeCoordOutput(raw) {
-      var n = raw.normalize("NFKC").toLowerCase().replace(/\s+/g, "")
-      var hit =
-        !knFootprintPurged() &&
-        (n.indexOf("大倉翔太") !== -1 ||
-          n.indexOf("おおくらしょうた") !== -1 ||
-          n.indexOf("オオクラショウタ") !== -1 ||
-          (n.indexOf("大倉") !== -1 && n.indexOf("翔太") !== -1))
-      if (hit) {
-        return (
-          formatCoordPair(36.04872, 138.11184) +
-          "\n\n#Log_9901"
-        )
-      }
-      if (!raw) {
-        return "名前を入力してください。"
-      }
-      var c = deterministicJapanCoord(n)
-      return formatCoordPair(c.lat, c.lng)
-    }
-
-    function runCalc() {
-      var raw = (document.getElementById("name").value || "").trim()
-      document.getElementById("out").textContent = computeCoordOutput(raw)
-    }
-
-    document.getElementById("go").addEventListener("click", runCalc)
-    document.getElementById("name").addEventListener("keydown", function (e) {
-      if (e.key === "Enter") runCalc()
-    })
-
-    ;(function () {
-      var KN_FP_KEY = "signal_trace_kn_footprint_v2"
-      window.addEventListener("storage", function (e) {
-        if (e.key !== KN_FP_KEY) return
-        var v = e.newValue
-        if (v !== "purged_delete" && v !== "purged_keep") return
-        var raw = (document.getElementById("name").value || "").trim()
-        if (raw) runCalc()
-      })
-    })()
-</script>
 </body>
 </html>
